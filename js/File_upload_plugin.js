@@ -1,0 +1,271 @@
+
+/*
+ * JS File Upload Plugin 1.0
+ *
+ * Copyright 2015, Smirnov Ruslan
+ * https://smirnyga.ru
+ *
+ * Licensed under the MIT license:
+ * http://www.opensource.org/licenses/MIT
+ */
+ 
+function File_upload(param) {
+	
+	param = param || {};
+	
+    this.settings = {
+        maxSize: 1024 * 1024 * 1024,
+        maxFiles: '*',
+        extList: 'jpg,rar,png,jpeg,zip,avi,ppt,pptx,docx,doc,mp3,7z,txt,flv,mp4',
+        root_dir: '',
+        upload_php: '',
+        bytes_chunk: 1024 * 1024 * 2
+    };
+
+    this.loaded = true;
+    this.storage = new Array();
+
+
+    for (property in param) {
+        this.settings[property] = param[property];
+    }
+
+    this.settings.extList = String(this.settings.extList).split(',');
+
+
+    this.error_function = function(code_err, file) {};
+    this.status_prepare_function = function(file) {};
+    this.status_upload_function = function(file) {};
+    this.ajax_error_function = function(file) {};
+	this.error_error_function = function(file) {};
+    this.success_complete_function = function(data, file) {};
+    this.uploading_progress_function = function(percent, percent_text) {};
+    this.all_complete_function = function() {};
+}
+
+File_upload.prototype.all_complete = function(anon) {
+    this.all_complete_function = anon;
+};
+
+File_upload.prototype.error = function(anon) {
+    this.error_function = anon;
+};
+
+File_upload.prototype.success_complete = function(anon) {
+    this.success_complete_function = anon;
+};
+
+File_upload.prototype.upload_abort = function() {
+    this.self_ajax.abort();
+	this.abort_error_function(this.file);
+	this.loaded = true;
+	if(this.settings.delay != 0) { clearTimeout(this.timeoutID); }
+    if (this.storage.length > 0) {
+        this.upload_ajax();
+    }
+	
+};
+
+
+File_upload.prototype.ajax_error = function(anon) {
+    this.ajax_error_function = anon;
+}
+
+File_upload.prototype.abort_error = function(anon) {
+    this.abort_error_function = anon;
+}
+
+
+
+File_upload.prototype.uploading_progress = function(anon) {
+    this.uploading_progress_function = anon;
+};
+
+File_upload.prototype.upload_ajax_chunk = function(chunk, part_id) {
+console.log('Загружается часть №: ' + part_id);
+console.log(1024 * 1024 * 2 * Number(part_id));
+
+
+    percent_blob = 0;
+    var percent_chunk = 100 / this.parts;
+    var form = new FormData();
+
+	
+    form.append('upload', chunk);
+    form.append('part_id', part_id);
+    form.append('parts', this.parts);
+    form.append('file_name', this.file.name);
+
+    self = this;
+    this.self_ajax = $.ajax({
+        url: self.settings.upload_php,
+        type: 'post',
+        data: form,
+        dataType: 'json',
+        cache: false,
+        contentType: false,
+        processData: false,
+        xhr: function() {
+            var req = $.ajaxSettings.xhr();
+            if (req.upload) {
+                req.upload.addEventListener('progress', function(event) {
+                    var percent = 0;
+                    var position = event.loaded || event.position;
+                    var total = event.total || event.totalSize;
+                    if (event.lengthComputable) {
+                        percent = position / total * 100;
+                        percent_blob = percent_chunk * percent / 100;
+                        percent_blob = self.percent_all + percent_blob;
+                        self.uploading_progress_function(percent_blob, (percent_blob - (percent_blob % 1)));
+                    }
+
+                }, false);
+
+            }
+            return req;
+
+        },
+        success: function(data, message, xhr) {
+
+            self.percent_all = percent_blob;
+		
+			
+            if ('file_loaded' in data) {
+			    var time_end = Date.now();
+				var interval = new Date(time_end - self.time_start);
+				console.log(interval.getUTCHours() + ' : ' + interval.getUTCMinutes() + ' : ' + interval.getUTCSeconds() + ' : FILE: ' + self.file.name);
+                self.success_complete_function(data, self.file);
+                self.loaded = true;
+                if (self.storage.length > 0) {
+                    self.upload_ajax();
+                } else {
+                    self.all_complete_function();
+                }
+            } else {
+				self.set_chunk();
+            }
+
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+			if(textStatus != 'abort') {
+		console.log(textStatus); 
+		
+		if(textStatus == 'parsererror') { self.upload_ajax_chunk(chunk, part_id); } 
+		
+			self.ajax_error_function(self.file);
+				
+			}
+			
+			
+        },
+		statusCode: {
+    403: function() {
+      self.upload_ajax_chunk(chunk, part_id);
+    },
+	101: function() {
+      self.set_chunk();
+    },
+	324: function() {
+      self.set_chunk();
+    },
+	500: function() {
+      self.set_chunk();
+    },
+	404: function() {
+      self.upload_ajax_chunk(chunk, part_id);
+    },
+	400: function() {
+      self.set_chunk();
+    }
+  }
+
+
+    });
+
+
+};
+
+
+File_upload.prototype.upload_ajax = function() {
+    if (this.loaded == true) {
+        this.file = this.storage.shift();
+        this.status_upload_function(this.file);
+        this.loaded = false;
+        this.percent_all = 0;
+        this.start_bytes = 0;
+        this.end_bytes = this.settings.bytes_chunk;
+        this.parts = Math.ceil(this.file.size / this.settings.bytes_chunk);
+        this.part_id = 1;
+        this.set_chunk();
+		this.time_start = Date.now(); 
+
+    }
+};
+
+
+File_upload.prototype.set_chunk = function() {
+
+    chunk = this.check_slice();
+    this.start_bytes = this.end_bytes;
+    this.end_bytes = this.start_bytes + this.settings.bytes_chunk;
+	this.upload_ajax_chunk(chunk, this.part_id++);
+
+
+}
+
+
+File_upload.prototype.check_slice = function() {
+    if (this.file.slice) {
+        var chunk = this.file.slice(this.start_bytes, this.end_bytes);
+    } else {
+        if (this.file.webkitSlice) {
+            var chunk = this.file.webkitSlice(this.start_bytes, this.end_bytes);
+        } else {
+            if (this.file.mozSlice) {
+                var chunk = this.file.mozSlice(this.start_bytes, this.end_bytes);
+            }
+        }
+    }
+    return chunk;
+
+};
+
+File_upload.prototype.status_prepare = function(anon) {
+    this.status_prepare_function = anon;
+};
+
+File_upload.prototype.status_upload = function(anon) {
+    this.status_upload_function = anon;
+};
+
+
+File_upload.prototype.uploadFile = function(files) {
+
+    for (i = 0, l = files.length; i < l; i++) {
+
+        var ext = files[i].name.toLowerCase().split('.').pop();
+
+        if (files[i].size > this.settings.maxSize) {
+            this.error_function(1, files[i]);
+            continue;
+        }
+
+        if ($.inArray(ext, this.settings.extList) < 0) {
+            this.error_function(2, files[i]);
+            continue;
+        }
+
+
+        this.storage.push(files[i]);
+        this.status_prepare_function(files[i]);
+
+
+    }
+
+
+    if (this.storage.length > 0) {
+        this.upload_ajax();
+    }
+
+
+};
