@@ -17,7 +17,6 @@ function File_uploader(param) {
         maxSize: 1024 * 1024 * 1024,
         maxFiles: '*',
         extList: 'jpg,rar,png,jpeg,zip,avi,ppt,pptx,docx,doc,mp3,7z,txt,flv,mp4',
-        root_dir: '',
         upload_php: '',
         bytes_chunk: 1024 * 1024 * 2
     };
