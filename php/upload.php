@@ -2,6 +2,10 @@
 //error_reporting(0);
 session_start();
 $output_dir = "../temp/";
+$upload_dir = "../uploads/";
+
+
+
 $part_id = $_POST['part_id'];
 $parts = $_POST['parts'];
 $file_client = $_POST['file_name'];
@@ -57,7 +61,7 @@ $blob = $part_id . '.blob';
 //if(($_FILES["upload"]["size"] == 2097152) || ($part_id == $parts)) {
 move_uploaded_file($_FILES["upload"]["tmp_name"], $_SESSION['file_dir'] . $blob);
 $buffer = file_get_contents($_SESSION['file_dir'] . $blob);
-file_put_contents("../uploads/" . $_SESSION['file_server'], $buffer, FILE_APPEND);
+file_put_contents($upload_dir . $_SESSION['file_server'], $buffer, FILE_APPEND);
 
 
 
@@ -68,7 +72,7 @@ unlink($_SESSION['file_dir'] . $blob);
 
 if (empty($parts)) {
     rmdir($_SESSION['file_dir']);
-    unlink("../uploads/" . $_SESSION['file_server']);
+    unlink($upload_dir . $_SESSION['file_server']);
 
 	
 	setcookie('uploading', '', time() - 3600);
@@ -88,7 +92,7 @@ if (empty($parts)) {
         rmdir($_SESSION['file_dir']);
 
         $img = 0;
-        if (getimagesize("../uploads/" . $_SESSION['file_server'])) {
+        if (getimagesize($upload_dir . $_SESSION['file_server'])) {
             $img = 1;
         }
 
@@ -97,7 +101,7 @@ if (empty($parts)) {
         $json_answer['file_name'] = $_SESSION['file_server'];
         $json_answer['is_img'] = $img;
         $json_answer['true_file_name'] = $file_client;
-        $size = filesize("../uploads/" . $_SESSION['file_server']);
+        $size = filesize($upload_dir . $_SESSION['file_server']);
         $json_answer['file_size'] = $size;
         $json_answer['file_type'] = $_SESSION['ext'];
         $json_answer['file_date'] = date("Y-m-d");
