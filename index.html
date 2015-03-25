@@ -38,9 +38,7 @@
     <!-- Begin page content -->
     <div class="container">
 
-        <!-- 
-			Табличка изменяется аяксово. Редактировать пункт можно выпилить. Хотя им можно менять дату заливки и id. Вот только зачем..?
-		-->
+       
         <form method="post">
             <button type="button" id="uploader" class="btn btn-primary btn-lg btn-block">Прикрепить файлы</button>
             <input type="file" id="page_form" name="upload" multiple />
@@ -100,17 +98,8 @@
         <p class="text-muted">Copyright 2015 &copy; Смирнов Руслан | Все права защищены</p>
       </div>
     </footer>
-    <!--
-<div id="blueimp-gallery" class="blueimp-gallery" data-start-slideshow="true" data-filter=":even">
-    <div class="slides"></div>
-    <h3 class="title"></h3>
-    <a class="prev">‹</a>
-    <a class="next">›</a>
-    <a class="close">?</a>
-    <a class="play-pause"></a>
-    <ol class="indicator"></ol>
-</div>	 
--->
+ 
+
     <div id="blueimp-gallery" class="blueimp-gallery">
         <div class="slides"></div>
         <h3 class="title"></h3>
@@ -201,17 +190,6 @@
 
 
 
-            });
-
-
-            $('body').delegate('.del_fl', 'click', function(e) {
-                e.preventDefault();
-                var at = $(this).parent().attr('id');
-                $.post('php/delete.php', {
-                    file_id: at,
-                    action: '1'
-                });
-                $(this).closest('tr').remove();
             });
 
             $('#uploader').click(function(e) {
