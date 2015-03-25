@@ -9,7 +9,7 @@
  * http://www.opensource.org/licenses/MIT
  */
  
-function File_upload(param) {
+function File_uploader(param) {
 	
 	param = param || {};
 	
@@ -43,19 +43,19 @@ function File_upload(param) {
     this.all_complete_function = function() {};
 }
 
-File_upload.prototype.all_complete = function(anon) {
+File_uploader.prototype.all_complete = function(anon) {
     this.all_complete_function = anon;
 };
 
-File_upload.prototype.error = function(anon) {
+File_uploader.prototype.error = function(anon) {
     this.error_function = anon;
 };
 
-File_upload.prototype.success_complete = function(anon) {
+File_uploader.prototype.success_complete = function(anon) {
     this.success_complete_function = anon;
 };
 
-File_upload.prototype.upload_abort = function() {
+File_uploader.prototype.upload_abort = function() {
     this.self_ajax.abort();
 	this.abort_error_function(this.file);
 	this.loaded = true;
@@ -67,21 +67,21 @@ File_upload.prototype.upload_abort = function() {
 };
 
 
-File_upload.prototype.ajax_error = function(anon) {
+File_uploader.prototype.ajax_error = function(anon) {
     this.ajax_error_function = anon;
 }
 
-File_upload.prototype.abort_error = function(anon) {
+File_uploader.prototype.abort_error = function(anon) {
     this.abort_error_function = anon;
 }
 
 
 
-File_upload.prototype.uploading_progress = function(anon) {
+File_uploader.prototype.uploading_progress = function(anon) {
     this.uploading_progress_function = anon;
 };
 
-File_upload.prototype.upload_ajax_chunk = function(chunk, part_id) {
+File_uploader.prototype.upload_ajax_chunk = function(chunk, part_id) {
 console.log('Загружается часть №: ' + part_id);
 console.log(1024 * 1024 * 2 * Number(part_id));
 
@@ -148,12 +148,17 @@ console.log(1024 * 1024 * 2 * Number(part_id));
         },
         error: function(jqXHR, textStatus, errorThrown) {
 			if(textStatus != 'abort') {
-		console.log(textStatus); 
+		console.log(textStatus); //parsererror error /403 /101 /324
+		
 		
 		if(textStatus == 'parsererror') { self.upload_ajax_chunk(chunk, part_id); } 
 		
+//if(errorThrown != 'Internal Server Error') { self.upload_ajax_chunk(chunk, part_id); } else {  self.set_chunk();  }
+
+			
 			self.ajax_error_function(self.file);
-				
+			
+		
 			}
 			
 			
@@ -186,7 +191,7 @@ console.log(1024 * 1024 * 2 * Number(part_id));
 };
 
 
-File_upload.prototype.upload_ajax = function() {
+File_uploader.prototype.upload_ajax = function() {
     if (this.loaded == true) {
         this.file = this.storage.shift();
         this.status_upload_function(this.file);
@@ -203,7 +208,7 @@ File_upload.prototype.upload_ajax = function() {
 };
 
 
-File_upload.prototype.set_chunk = function() {
+File_uploader.prototype.set_chunk = function() {
 
     chunk = this.check_slice();
     this.start_bytes = this.end_bytes;
@@ -214,7 +219,7 @@ File_upload.prototype.set_chunk = function() {
 }
 
 
-File_upload.prototype.check_slice = function() {
+File_uploader.prototype.check_slice = function() {
     if (this.file.slice) {
         var chunk = this.file.slice(this.start_bytes, this.end_bytes);
     } else {
@@ -230,16 +235,16 @@ File_upload.prototype.check_slice = function() {
 
 };
 
-File_upload.prototype.status_prepare = function(anon) {
+File_uploader.prototype.status_prepare = function(anon) {
     this.status_prepare_function = anon;
 };
 
-File_upload.prototype.status_upload = function(anon) {
+File_uploader.prototype.status_upload = function(anon) {
     this.status_upload_function = anon;
 };
 
 
-File_upload.prototype.uploadFile = function(files) {
+File_uploader.prototype.uploadFile = function(files) {
 
     for (i = 0, l = files.length; i < l; i++) {
 

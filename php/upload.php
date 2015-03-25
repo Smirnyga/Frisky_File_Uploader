@@ -1,4 +1,5 @@
 <?php
+//error_reporting(0);
 session_start();
 $output_dir = "../temp/";
 $part_id = $_POST['part_id'];
@@ -52,6 +53,8 @@ if (!isset($_SESSION['uploading'])) {
 
 $blob = $part_id . '.blob';
 
+
+//if(($_FILES["upload"]["size"] == 2097152) || ($part_id == $parts)) {
 move_uploaded_file($_FILES["upload"]["tmp_name"], $_SESSION['file_dir'] . $blob);
 $buffer = file_get_contents($_SESSION['file_dir'] . $blob);
 file_put_contents("../uploads/" . $_SESSION['file_server'], $buffer, FILE_APPEND);

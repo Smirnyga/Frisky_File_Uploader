@@ -16,6 +16,7 @@
       <script src="js/respond.min.js"></script>
     <![endif]-->
     <link rel="stylesheet" href="css/blueimp-gallery.min.css">
+    <link href="css/sticky-footer-navbar.css" rel="stylesheet">
     <style type="text/css">
         #page_form {
             display: none;
@@ -24,7 +25,15 @@
 </head>
 
 <body>
-    <!-- Fixed navbar --
+    <!-- Fixed navbar -->
+	 <nav class="navbar navbar-default navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="#">File Uploader</a>
+        </div>
+       
+      </div>
+    </nav>
 
     <!-- Begin page content -->
     <div class="container">
@@ -62,11 +71,10 @@
                         <thead>
                             <tr>
                                 <th width="10%" class="tablecells">Превью</th>
-                                <th width="" class="tablecells">Имя файла:</th>
+                                <th width="10%" class="tablecells">Имя файла:</th>
                                 <th width="10%" class="tablecells">Тип:</th>
                                 <th width="10%" class="tablecells">Размер:</th>
                                 <th width="15%" class="tablecells">Дата заливки:</th>
-                                <th width="10%" class="tablecells">Действия:</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -86,13 +94,12 @@
 
     </div>
     <!-- /page content -->
-
-    <div id="footer" class="">
-        <div class="container">
-            <p class="text-muted">Copyright 2014 &copy; Smirnov Ruslan. All rights reserved.</p>
-        </div>
-    </div>
-
+	
+	<footer class="footer">
+      <div class="container">
+        <p class="text-muted">Copyright 2015 &copy; Смирнов Руслан | Все права защищены</p>
+      </div>
+    </footer>
     <!--
 <div id="blueimp-gallery" class="blueimp-gallery" data-start-slideshow="true" data-filter=":even">
     <div class="slides"></div>
@@ -118,11 +125,11 @@
     <script src="js/jquery-1.11.1.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
     <script src="http://blueimp.github.io/Gallery/js/jquery.blueimp-gallery.min.js"></script>
-    <script src="js/File_upload_plugin.js"></script>
+    <script src="js/File_uploader_plugin.js"></script>
     <script type="text/javascript">
         $(document).ready(function() {
 
-            uploader = new File_upload({
+            uploader = new File_uploader({
                 upload_php: 'php/upload.php'
             });
             uploader.error(function(code_err, file) {
@@ -190,7 +197,7 @@
                 }
 
 
-                $('#uploaing_list').append('<tr><td>' + prew + '</td><td>' + data.true_file_name + '</td><td>' + data.file_type + '</td><td>' + data.file_size + ' Bytes</td><td>' + data.file_date + '</td><td id="' + data.id + '" class="tablecells"><a href="" title="Скачать" class="glyphicon glyphicon-cloud-download"></a><a href="#" title="Удалить" class="glyphicon glyphicon-trash del_fl"></a></td></tr>');
+                $('#uploaing_list').append('<tr><td>' + prew + '</td><td>' + data.true_file_name + '</td><td>' + data.file_type + '</td><td>' + data.file_size + ' Bytes</td><td>' + data.file_date + '</td></tr>');
 
 
 
